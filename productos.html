@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - Sistema de Inventario</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+    <!-- Header will be injected by JavaScript -->
+    <div id="headerContainer"></div>
+
+    <!-- Main layout -->
+    <div class="main-container">
+        <!-- Sidebar will be injected by JavaScript -->
+        <div id="sidebarContainer"></div>
+
+        <!-- Main content -->
+        <main class="content">
+            <div class="page-header">
+                <div>
+                    <h2>Productos</h2>
+                    <p class="subtitle">Gestiona el catalogo de productos</p>
+                </div>
+                <button class="btn-add" onclick="openProductModal()">+ Agregar Producto</button>
+            </div>
+
+            <!-- Search bar -->
+            <div class="search-bar">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Buscar producto por nombre o categoria..."
+                    oninput="searchProducts()"
+                >
+            </div>
+
+            <!-- Products table -->
+            <div class="table-container">
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Categoria</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Products will be inserted here by JavaScript -->
+                    </tbody>
+                </table>
+                <p id="emptyMessage" class="empty-message" style="display: none;">
+                    No se encontraron productos
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal (Add/Edit) -->
+    <div id="productModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Agregar Producto</h3>
+                <button class="modal-close" onclick="closeProductModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm" onsubmit="saveProduct(event)">
+                    <input type="hidden" id="productId">
+                    
+                    <div class="form-group">
+                        <label for="productName">Nombre del producto</label>
+                        <input type="text" id="productName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productDescription">Descripcion</label>
+                        <input type="text" id="productDescription">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productPrice">Precio unitario</label>
+                            <input type="number" id="productPrice" min="0" step="100" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="productStock">Cantidad</label>
+                            <input type="number" id="productStock" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productCategory">Categoria</label>
+                        <select id="productCategory" required>
+                            <option value="">Seleccione una categoria</option>
+                            <option value="Herrajes">Herrajes</option>
+                            <option value="Pintura">Pintura</option>
+                            <option value="Herramientas">Herramientas</option>
+                            <option value="Lijas">Lijas</option>
+                            <option value="Plomeria">Plomeria</option>
+                            <option value="Electricidad">Electricidad</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeProductModal()">Cancelar</button>
+                        <button type="submit" class="btn-save">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal-overlay" style="display: none;">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Confirmar eliminacion</h3>
+                <button class="modal-close" onclick="closeDeleteModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <p>Esta seguro que desea eliminar este producto?</p>
+                <p class="delete-warning">Esta accion no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="btn-delete" onclick="confirmDelete()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/productos.js"></script>
+</body>
+</html>
