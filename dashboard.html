@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferreteria Caldas</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+    <!-- Header will be inserted here by JavaScript -->
+    <div id="headerContainer"></div>
+
+    <!-- Main layout -->
+    <div class="main-container">
+        <!-- Sidebar will be inserted here by JavaScript -->
+        <div id="sidebarContainer"></div>
+
+        <!-- Main content -->
+        <main class="content">
+            <h2>Dashboard</h2>
+            <p class="subtitle">Resumen general del inventario</p>
+
+            <!-- Summary cards -->
+            <div class="cards-container">
+                <div class="card">
+                    <h3>Total Productos</h3>
+                    <p class="number">45</p>
+                    <span class="badge badge-green">+2 este mes</span>
+                </div>
+
+                <div class="card">
+                    <h3>Stock Total</h3>
+                    <p class="number">1,280</p>
+                    <span class="badge badge-green">+45 este mes</span>
+                </div>
+
+                <div class="card">
+                    <h3>Valor Total</h3>
+                    <p class="number">$156,800</p>
+                    <span class="badge badge-green">+$12,400</span>
+                </div>
+
+                <div class="card">
+                    <h3>Alertas</h3>
+                    <p class="number">3</p>
+                    <span class="badge badge-red">2 criticas</span>
+                </div>
+            </div>
+
+            <!-- Bottom sections -->
+            <div class="dashboard-sections">
+                <div class="section">
+                    <h3>Productos con Stock Bajo</h3>
+                    <ul>
+                        <li>
+                            <span class="dot red"></span>
+                            Clavo 2" - <strong>3</strong> unidades
+                            <button class="btn-order">Pedir</button>
+                        </li>
+                        <li>
+                            <span class="dot red"></span>
+                            Pintura Azul - <strong>2</strong> unidades
+                            <button class="btn-order">Pedir</button>
+                        </li>
+                        <li>
+                            <span class="dot red"></span>
+                            Lija N80 - <strong>4</strong> unidades
+                            <button class="btn-order">Pedir</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>Movimientos Recientes</h3>
+                    <ul>
+                        <li>
+                            <span class="badge-sale">Venta</span>
+                            Clavo 2" - <strong>-5</strong> unidades
+                            <span class="time">Hoy 10:30</span>
+                        </li>
+                        <li>
+                            <span class="badge-purchase">Compra</span>
+                            Pintura Azul - <strong>+20</strong> unidades
+                            <span class="time">Hoy 10:15</span>
+                        </li>
+                        <li>
+                            <span class="badge-sale">Venta</span>
+                            Martillo - <strong>-2</strong> unidades
+                            <span class="time">Ayer 16:45</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
