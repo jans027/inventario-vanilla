@@ -1,22 +1,46 @@
 /**
  * Products module
  * Handles all product management: listing, searching, adding, editing and deleting
+ * Products are stored in localStorage so they can be shared with the movements page
  */
-
-// Products data (temporary - will be replaced with backend data later)
-let products = [
-    { id: 1, name: 'Clavo 2"', description: 'Clavo de acero galvanizado', price: 5000, stock: 45, category: 'Herrajes' },
-    { id: 2, name: 'Pintura Azul', description: 'Pintura vinilica azul 1 galon', price: 25000, stock: 2, category: 'Pintura' },
-    { id: 3, name: 'Martillo', description: 'Martillo de acero con mango', price: 15000, stock: 12, category: 'Herramientas' },
-    { id: 4, name: 'Lija N80', description: 'Lija para madera grano 80', price: 3000, stock: 4, category: 'Lijas' },
-    { id: 5, name: 'Sierra', description: 'Sierra manual para madera', price: 35000, stock: 8, category: 'Herramientas' }
-];
 
 // Minimum stock threshold for low stock alerts
 const MIN_STOCK = 5;
 
 // Current product id being deleted (for the delete modal)
 let productIdToDelete = null;
+
+// Products array (loaded from localStorage)
+let products = [];
+
+/**
+ * Load products from localStorage
+ * If there are no products saved, initialize with default data
+ */
+function loadProducts() {
+    const stored = localStorage.getItem('products');
+
+    if (stored) {
+        products = JSON.parse(stored);
+    } else {
+        // Default products for first time use
+        products = [
+            { id: 1, name: 'Clavo 2"', description: 'Clavo de acero galvanizado', price: 5000, stock: 45, category: 'Herrajes' },
+            { id: 2, name: 'Pintura Azul', description: 'Pintura vinilica azul 1 galon', price: 25000, stock: 2, category: 'Pintura' },
+            { id: 3, name: 'Martillo', description: 'Martillo de acero con mango', price: 15000, stock: 12, category: 'Herramientas' },
+            { id: 4, name: 'Lija N80', description: 'Lija para madera grano 80', price: 3000, stock: 4, category: 'Lijas' },
+            { id: 5, name: 'Sierra', description: 'Sierra manual para madera', price: 35000, stock: 8, category: 'Herramientas' }
+        ];
+        saveProducts();
+    }
+}
+
+/**
+ * Save products to localStorage
+ */
+function saveProducts() {
+    localStorage.setItem('products', JSON.stringify(products));
+}
 
 /**
  * Initialize the products page when the DOM is ready
@@ -27,7 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Render the initial list of products
+    // Load products and render
+    loadProducts();
     renderProducts(products);
 });
 
@@ -39,10 +64,8 @@ function renderProducts(productList) {
     const tableBody = document.getElementById('productTableBody');
     const emptyMessage = document.getElementById('emptyMessage');
 
-    // Clear the table
     tableBody.innerHTML = '';
 
-    // Show empty message if no products
     if (productList.length === 0) {
         emptyMessage.style.display = 'block';
         return;
@@ -50,9 +73,7 @@ function renderProducts(productList) {
 
     emptyMessage.style.display = 'none';
 
-    // Build each row
     productList.forEach((product, index) => {
-        // Check if stock is low
         const lowStockClass = product.stock < MIN_STOCK ? 'low-stock' : '';
         const warningText = product.stock < MIN_STOCK ? ' (!)' : '';
 
@@ -74,12 +95,10 @@ function renderProducts(productList) {
 
 /**
  * Search products by name or category
- * Called when the user types in the search input
  */
 function searchProducts() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
 
-    // Filter products
     const filtered = products.filter(product => 
         product.name.toLowerCase().includes(searchTerm) ||
         product.category.toLowerCase().includes(searchTerm)
@@ -92,14 +111,9 @@ function searchProducts() {
  * Open the modal to add a new product
  */
 function openProductModal() {
-    // Set the title for adding
     document.getElementById('modalTitle').textContent = 'Agregar Producto';
-    
-    // Clear the form
     document.getElementById('productForm').reset();
     document.getElementById('productId').value = '';
-
-    // Show the modal
     document.getElementById('productModal').style.display = 'flex';
 }
 
@@ -108,25 +122,17 @@ function openProductModal() {
  * @param {number} id - The id of the product to edit
  */
 function editProduct(id) {
-    // Find the product
     const product = products.find(p => p.id === id);
 
-    if (!product) {
-        return;
-    }
+    if (!product) return;
 
-    // Set the title for editing
     document.getElementById('modalTitle').textContent = 'Editar Producto';
-
-    // Fill the form with product data
     document.getElementById('productId').value = product.id;
     document.getElementById('productName').value = product.name;
     document.getElementById('productDescription').value = product.description;
     document.getElementById('productPrice').value = product.price;
     document.getElementById('productStock').value = product.stock;
     document.getElementById('productCategory').value = product.category;
-
-    // Show the modal
     document.getElementById('productModal').style.display = 'flex';
 }
 
@@ -145,7 +151,6 @@ function closeProductModal() {
 function saveProduct(event) {
     event.preventDefault();
 
-    // Get form values
     const id = document.getElementById('productId').value;
     const name = document.getElementById('productName').value.trim();
     const description = document.getElementById('productDescription').value.trim();
@@ -153,11 +158,9 @@ function saveProduct(event) {
     const stock = parseInt(document.getElementById('productStock').value);
     const category = document.getElementById('productCategory').value;
 
-    // Check if we are editing (id exists) or creating (no id)
     if (id) {
         // Update existing product
         const index = products.findIndex(p => p.id === parseInt(id));
-
         if (index !== -1) {
             products[index] = {
                 id: parseInt(id),
@@ -169,7 +172,7 @@ function saveProduct(event) {
             };
         }
     } else {
-        // Create new product with a new id
+        // Create new product
         const newId = products.length > 0 
             ? Math.max(...products.map(p => p.id)) + 1 
             : 1;
@@ -184,7 +187,7 @@ function saveProduct(event) {
         });
     }
 
-    // Re-render the table and close the modal
+    saveProducts();
     renderProducts(products);
     closeProductModal();
 }
@@ -210,14 +213,11 @@ function closeDeleteModal() {
  * Confirm and perform the delete operation
  */
 function confirmDelete() {
-    if (productIdToDelete === null) {
-        return;
-    }
+    if (productIdToDelete === null) return;
 
-    // Remove the product from the list
     products = products.filter(p => p.id !== productIdToDelete);
 
-    // Reset and re-render
+    saveProducts();
     productIdToDelete = null;
     closeDeleteModal();
     renderProducts(products);

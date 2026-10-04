@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movimientos - Sistema de Inventario</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+    <!-- Header will be injected by JavaScript -->
+    <div id="headerContainer"></div>
+
+    <!-- Main layout -->
+    <div class="main-container">
+        <!-- Sidebar will be injected by JavaScript -->
+        <div id="sidebarContainer"></div>
+
+        <!-- Main content -->
+        <main class="content">
+            <div class="page-header">
+                <div>
+                    <h2>Movimientos</h2>
+                    <p class="subtitle">Registro de ventas y compras</p>
+                </div>
+                <div class="header-buttons">
+                    <button class="btn-sell" onclick="openSellModal()">Registrar Venta</button>
+                    <button class="btn-purchase" onclick="openPurchaseModal()">Registrar Compra</button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-bar">
+                <input 
+                    type="text" 
+                    id="searchMovement" 
+                    placeholder="Buscar por producto..."
+                    oninput="filterMovements()"
+                >
+                <select id="filterType" onchange="filterMovements()">
+                    <option value="all">Todos los tipos</option>
+                    <option value="venta">Solo ventas</option>
+                    <option value="compra">Solo compras</option>
+                </select>
+            </div>
+
+            <!-- Movements table -->
+            <div class="table-container">
+                <table class="product-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movementTableBody">
+                        <!-- Movements will be inserted here -->
+                    </tbody>
+                </table>
+                <p id="emptyMovements" class="empty-message" style="display: none;">
+                    No hay movimientos registrados
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Sell Modal -->
+    <div id="sellModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Registrar Venta</h3>
+                <button class="modal-close" onclick="closeSellModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <form id="sellForm" onsubmit="registerSell(event)">
+                    <div class="form-group">
+                        <label for="sellProduct">Producto</label>
+                        <select id="sellProduct" required onchange="updateSellInfo()">
+                            <option value="">Seleccione un producto</option>
+                        </select>
+                    </div>
+
+                    <div id="sellProductInfo" class="product-info" style="display: none;">
+                        <p>Precio: <strong id="sellPrice">$0</strong></p>
+                        <p>Stock disponible: <strong id="sellStock">0</strong></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sellQuantity">Cantidad a vender</label>
+                        <input type="number" id="sellQuantity" min="1" required oninput="updateSellTotal()">
+                    </div>
+
+                    <div class="total-box">
+                        <span>Total:</span>
+                        <strong id="sellTotal">$0</strong>
+                    </div>
+
+                    <p id="sellError" class="form-error"></p>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closeSellModal()">Cancelar</button>
+                        <button type="submit" class="btn-save">Confirmar Venta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Registrar Compra</h3>
+                <button class="modal-close" onclick="closePurchaseModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <form id="purchaseForm" onsubmit="registerPurchase(event)">
+                    <div class="form-group">
+                        <label for="purchaseProduct">Producto</label>
+                        <select id="purchaseProduct" required onchange="updatePurchaseInfo()">
+                            <option value="">Seleccione un producto</option>
+                        </select>
+                    </div>
+
+                    <div id="purchaseProductInfo" class="product-info" style="display: none;">
+                        <p>Stock actual: <strong id="purchaseStock">0</strong></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="purchaseQuantity">Cantidad a comprar</label>
+                        <input type="number" id="purchaseQuantity" min="1" required>
+                    </div>
+
+                    <p id="purchaseError" class="form-error"></p>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancel" onclick="closePurchaseModal()">Cancelar</button>
+                        <button type="submit" class="btn-save">Confirmar Compra</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/movimientos.js"></script>
+</body>
+</html>
