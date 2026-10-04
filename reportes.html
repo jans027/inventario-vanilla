@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - Sistema de Inventario</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+    <!-- Header will be injected by JavaScript -->
+    <div id="headerContainer"></div>
+
+    <!-- Main layout -->
+    <div class="main-container">
+        <!-- Sidebar will be injected by JavaScript -->
+        <div id="sidebarContainer"></div>
+
+        <!-- Main content -->
+        <main class="content">
+            <h2>Reportes</h2>
+            <p class="subtitle">Estadisticas y analisis del inventario</p>
+
+            <!-- Summary cards -->
+            <div class="cards-container">
+                <div class="card">
+                    <h3>Total Productos</h3>
+                    <p class="number" id="reportTotalProducts">0</p>
+                    <span class="badge badge-green">Registrados</span>
+                </div>
+
+                <div class="card">
+                    <h3>Unidades en Stock</h3>
+                    <p class="number" id="reportTotalStock">0</p>
+                    <span class="badge badge-green">Disponibles</span>
+                </div>
+
+                <div class="card">
+                    <h3>Valor del Inventario</h3>
+                    <p class="number" id="reportTotalValue">$0</p>
+                    <span class="badge badge-green">Total</span>
+                </div>
+
+                <div class="card">
+                    <h3>Productos con Stock Bajo</h3>
+                    <p class="number" id="reportLowStock">0</p>
+                    <span class="badge badge-red">Requieren pedido</span>
+                </div>
+            </div>
+
+            <!-- Reports grid -->
+            <div class="reports-grid">
+
+                <!-- Low stock report -->
+                <div class="report-card">
+                    <h3>Productos con Stock Bajo</h3>
+                    <ul id="lowStockList">
+                        <!-- Products will be inserted here -->
+                    </ul>
+                    <p id="noLowStock" class="empty-message" style="display: none;">
+                        No hay productos con stock bajo
+                    </p>
+                </div>
+
+                <!-- Movements summary -->
+                <div class="report-card">
+                    <h3>Resumen de Movimientos</h3>
+                    <ul>
+                        <li>
+                            <span>Total de ventas</span>
+                            <strong id="reportTotalSales">0</strong>
+                        </li>
+                        <li>
+                            <span>Total de compras</span>
+                            <strong id="reportTotalPurchases">0</strong>
+                        </li>
+                        <li>
+                            <span>Unidades vendidas</span>
+                            <strong id="reportUnitsSold">0</strong>
+                        </li>
+                        <li>
+                            <span>Unidades compradas</span>
+                            <strong id="reportUnitsPurchased">0</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Products by category chart -->
+                <div class="report-card">
+                    <h3>Productos por Categoria</h3>
+                    <div id="categoryChart" class="category-chart">
+                        <!-- Bars will be inserted here -->
+                    </div>
+                    <p id="noCategories" class="empty-message" style="display: none;">
+                        No hay productos registrados
+                    </p>
+                </div>
+
+                <!-- Inventory value by category -->
+                <div class="report-card">
+                    <h3>Valor por Categoria</h3>
+                    <ul id="valueByCategory">
+                        <!-- Values will be inserted here -->
+                    </ul>
+                    <p id="noValue" class="empty-message" style="display: none;">
+                        No hay productos registrados
+                    </p>
+                </div>
+            </div>
+
+            <!-- Recent movements -->
+            <div class="report-card report-card-full">
+                <h3>Ultimos Movimientos</h3>
+                <div class="table-container">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Producto</th>
+                                <th>Cantidad</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentMovementsBody">
+                            <!-- Movements will be inserted here -->
+                        </tbody>
+                    </table>
+                    <p id="noMovements" class="empty-message" style="display: none;">
+                        No hay movimientos registrados
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/layout.js"></script>
+    <script src="js/reportes.js"></script>
+</body>
+</html>
