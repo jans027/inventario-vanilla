@@ -123,19 +123,16 @@ function updateUser($conn) {
         sendResponse(false, null, 'Ya existe otro usuario con ese correo');
     }
 
-    // Update with or without password
+     // Update with or without password
     if (!empty($contrasena)) {
+        // If a new password was typed, encrypt it
+        $contrasena_encriptada = password_hash($contrasena, PASSWORD_DEFAULT);
         $stmt = $conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, contrasena = ?, rol = ?, estado = ? WHERE id = ?");
-        $stmt->bind_param("sssssi", $nombre, $correo, $contrasena, $rol, $estado, $id);
+        $stmt->bind_param("sssssi", $nombre, $correo, $contrasena_encriptada, $rol, $estado, $id);
     } else {
+        // If no password was typed, update without changing the password
         $stmt = $conn->prepare("UPDATE usuarios SET nombre = ?, correo = ?, rol = ?, estado = ? WHERE id = ?");
         $stmt->bind_param("ssssi", $nombre, $correo, $rol, $estado, $id);
-    }
-
-    if ($stmt->execute()) {
-        sendResponse(true, null, 'Usuario actualizado correctamente');
-    } else {
-        sendResponse(false, null, 'Error al actualizar: ' . $stmt->error);
     }
 }
 
