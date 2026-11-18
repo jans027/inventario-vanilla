@@ -37,43 +37,42 @@ document.addEventListener('DOMContentLoaded', function() {
  * Handle the login form submission
  * @param {Event} event - The form submit event
  */
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
 
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const errorElement = document.getElementById('loginError');
 
-    // Clear previous errors
     errorElement.textContent = '';
 
-    // Validate empty fields
     if (!email || !password) {
         errorElement.textContent = 'Por favor complete todos los campos';
         return;
     }
 
-    // Find user with matching credentials
-    const user = DEFAULT_USERS.find(u => 
-        u.email === email && u.password === password
-    );
+    try {
+        const response = await fetch('api/login.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ correo: email, contrasena: password })
+        });
 
-    if (!user) {
-        errorElement.textContent = 'Correo o contrasena incorrectos';
-        return;
+        const data = await response.json();
+
+        if (!data.success) {
+            errorElement.textContent = data.message || 'Credenciales incorrectas';
+            return;
+        }
+
+        // Save session
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+        window.location.href = 'dashboard.html';
+
+    } catch (error) {
+        errorElement.textContent = 'Error de conexion con el servidor';
+        console.error(error);
     }
-
-    // Save user session in localStorage
-    const sessionUser = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-    };
-    localStorage.setItem('currentUser', JSON.stringify(sessionUser));
-
-    // Redirect to dashboard
-    window.location.href = 'dashboard.html';
 }
 
 /**

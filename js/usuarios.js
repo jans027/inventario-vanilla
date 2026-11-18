@@ -1,56 +1,41 @@
 /**
  * Users module
  * Handles user management: listing, searching, adding, editing and deleting
- * Users are stored in localStorage
+ * Users are fetched from the backend API
  */
 
-// Users array (loaded from localStorage)
+// Users array (loaded from the backend)
 let users = [];
 
 // Current user id being deleted
 let userIdToDelete = null;
 
 /**
- * Load users from localStorage
- * If there are no users saved, initialize with default data from auth.js
+ * Load users from the backend
  */
-function loadUsers() {
-    const stored = localStorage.getItem('users');
+async function loadUsers() {
+    try {
+        const response = await fetch('api/usuarios.php');
+        const data = await response.json();
 
-    if (stored) {
-        users = JSON.parse(stored);
-    } else {
-        // Use the DEFAULT_USERS defined in auth.js
-        users = DEFAULT_USERS.map(user => ({
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            password: user.password,
-            role: user.role,
-            status: 'activo'
-        }));
-        saveUsers();
+        if (data.success) {
+            users = data.users;
+            renderUsers(users);
+        } else {
+            console.error('Error al cargar usuarios:', data.message);
+        }
+    } catch (error) {
+        console.error('Error de conexion:', error);
     }
-}
-
-/**
- * Save users to localStorage
- */
-function saveUsers() {
-    localStorage.setItem('users', JSON.stringify(users));
 }
 
 /**
  * Initialize the users page when the DOM is ready
  */
 document.addEventListener('DOMContentLoaded', function() {
-    // Only run if we are on the users page
-    if (!document.getElementById('userTableBody')) {
-        return;
+    if (document.getElementById('userTableBody')) {
+        loadUsers();
     }
-
-    loadUsers();
-    renderUsers(users);
 });
 
 /**
@@ -71,19 +56,19 @@ function renderUsers(userList) {
     emptyMessage.style.display = 'none';
 
     userList.forEach((user, index) => {
-        const roleBadge = user.role === 'admin'
+        const roleBadge = user.rol === 'admin'
             ? '<span class="role-admin">Administrador</span>'
             : '<span class="role-seller">Vendedor</span>';
 
-        const statusBadge = user.status === 'activo'
+        const statusBadge = user.estado === 'activo'
             ? '<span class="status-active">Activo</span>'
             : '<span class="status-inactive">Inactivo</span>';
 
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${index + 1}</td>
-            <td>${user.name}</td>
-            <td>${user.email}</td>
+            <td>${user.nombre}</td>
+            <td>${user.correo}</td>
             <td>${roleBadge}</td>
             <td>${statusBadge}</td>
             <td>
@@ -101,9 +86,9 @@ function renderUsers(userList) {
 function searchUsers() {
     const searchTerm = document.getElementById('searchUser').value.toLowerCase().trim();
 
-    const filtered = users.filter(user => 
-        user.name.toLowerCase().includes(searchTerm) ||
-        user.email.toLowerCase().includes(searchTerm)
+    const filtered = users.filter(user =>
+        user.nombre.toLowerCase().includes(searchTerm) ||
+        user.correo.toLowerCase().includes(searchTerm)
     );
 
     renderUsers(filtered);
@@ -132,12 +117,12 @@ function editUser(id) {
 
     document.getElementById('userModalTitle').textContent = 'Editar Usuario';
     document.getElementById('userId').value = user.id;
-    document.getElementById('userName').value = user.name;
-    document.getElementById('userEmail').value = user.email;
+    document.getElementById('userName').value = user.nombre;
+    document.getElementById('userEmail').value = user.correo;
     document.getElementById('userPassword').value = '';
     document.getElementById('userPassword').required = false;
-    document.getElementById('userRole').value = user.role;
-    document.getElementById('userStatus').value = user.status;
+    document.getElementById('userRole').value = user.rol;
+    document.getElementById('userStatus').value = user.estado;
     document.getElementById('userError').textContent = '';
     document.getElementById('userModal').style.display = 'flex';
 }
@@ -155,69 +140,40 @@ function closeUserModal() {
  * Save a user (create new or update existing)
  * @param {Event} event - The form submit event
  */
-function saveUser(event) {
+async function saveUser(event) {
     event.preventDefault();
 
     const id = document.getElementById('userId').value;
-    const name = document.getElementById('userName').value.trim();
-    const email = document.getElementById('userEmail').value.trim().toLowerCase();
-    const password = document.getElementById('userPassword').value;
-    const role = document.getElementById('userRole').value;
-    const status = document.getElementById('userStatus').value;
-    const errorElement = document.getElementById('userError');
+    const userData = {
+        nombre: document.getElementById('userName').value.trim(),
+        correo: document.getElementById('userEmail').value.trim().toLowerCase(),
+        contrasena: document.getElementById('userPassword').value,
+        rol: document.getElementById('userRole').value,
+        estado: document.getElementById('userStatus').value
+    };
 
-    errorElement.textContent = '';
+    const isEdit = id !== '';
+    if (isEdit) userData.id = parseInt(id);
 
-    if (!name || !email || !role || !status) {
-        errorElement.textContent = 'Por favor complete todos los campos obligatorios';
-        return;
-    }
-
-    const duplicate = users.find(u => 
-        u.email.toLowerCase() === email && u.id !== parseInt(id)
-    );
-
-    if (duplicate) {
-        errorElement.textContent = 'Ya existe un usuario con ese correo';
-        return;
-    }
-
-    if (id) {
-        const index = users.findIndex(u => u.id === parseInt(id));
-
-        if (index !== -1) {
-            users[index] = {
-                id: parseInt(id),
-                name: name,
-                email: email,
-                password: password || users[index].password,
-                role: role,
-                status: status
-            };
-        }
-    } else {
-        if (!password) {
-            errorElement.textContent = 'La contrasena es obligatoria para nuevos usuarios';
-            return;
-        }
-
-        const newId = users.length > 0 
-            ? Math.max(...users.map(u => u.id)) + 1 
-            : 1;
-
-        users.push({
-            id: newId,
-            name: name,
-            email: email,
-            password: password,
-            role: role,
-            status: status
+    try {
+        const response = await fetch('api/usuarios.php', {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
         });
-    }
 
-    saveUsers();
-    renderUsers(users);
-    closeUserModal();
+        const data = await response.json();
+
+        if (data.success) {
+            closeUserModal();
+            loadUsers();
+        } else {
+            document.getElementById('userError').textContent = data.message;
+        }
+    } catch (error) {
+        document.getElementById('userError').textContent = 'Error de conexion';
+        console.error(error);
+    }
 }
 
 /**
@@ -240,7 +196,7 @@ function closeDeleteUserModal() {
 /**
  * Confirm and perform the delete operation
  */
-function confirmDeleteUser() {
+async function confirmDeleteUser() {
     if (userIdToDelete === null) return;
 
     const currentUser = getCurrentUser();
@@ -250,10 +206,24 @@ function confirmDeleteUser() {
         return;
     }
 
-    users = users.filter(u => u.id !== userIdToDelete);
+    try {
+        const response = await fetch('api/usuarios.php', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: userIdToDelete })
+        });
 
-    saveUsers();
-    userIdToDelete = null;
-    closeDeleteUserModal();
-    renderUsers(users);
+        const data = await response.json();
+
+        if (data.success) {
+            userIdToDelete = null;
+            closeDeleteUserModal();
+            loadUsers();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error de conexion');
+        console.error(error);
+    }
 }

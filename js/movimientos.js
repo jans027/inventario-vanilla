@@ -1,59 +1,30 @@
-/**
- * Movements module
- * Handles all sales and purchases: registering, history, filtering
- * Also updates product stock when a movement is registered
- */
-
-// Movements array (stored in localStorage)
 let movements = [];
-
-// Products array (loaded from localStorage, shared with products page)
 let products = [];
 
-/**
- * Load movements and products from localStorage
- */
-function loadData() {
-    // Load movements
-    const storedMovements = localStorage.getItem('movements');
-    movements = storedMovements ? JSON.parse(storedMovements) : [];
+async function loadData() {
+    try {
+        const [movRes, prodRes] = await Promise.all([
+            fetch('api/movimientos.php'),
+            fetch('api/productos.php')
+        ]);
 
-    // Load products
-    const storedProducts = localStorage.getItem('products');
-    products = storedProducts ? JSON.parse(storedProducts) : [];
-}
+        const movData = await movRes.json();
+        const prodData = await prodRes.json();
 
-/**
- * Save movements to localStorage
- */
-function saveMovements() {
-    localStorage.setItem('movements', JSON.stringify(movements));
-}
-
-/**
- * Save products to localStorage (after stock changes)
- */
-function saveProducts() {
-    localStorage.setItem('products', JSON.stringify(products));
-}
-
-/**
- * Initialize the movements page when the DOM is ready
- */
-document.addEventListener('DOMContentLoaded', function() {
-    // Only run if we are on the movements page
-    if (!document.getElementById('movementTableBody')) {
-        return;
+        if (movData.success) movements = movData.movements;
+        if (prodData.success) products = prodData.products;
+    } catch (error) {
+        console.error('Error:', error);
     }
+}
 
-    loadData();
-    renderMovements(movements);
+document.addEventListener('DOMContentLoaded', async function() {
+    if (document.getElementById('movementTableBody')) {
+        await loadData();
+        renderMovements(movements);
+    }
 });
 
-/**
- * Render the movements table
- * @param {Array} movementList - The list of movements to display
- */
 function renderMovements(movementList) {
     const tableBody = document.getElementById('movementTableBody');
     const emptyMessage = document.getElementById('emptyMovements');
@@ -67,71 +38,43 @@ function renderMovements(movementList) {
 
     emptyMessage.style.display = 'none';
 
-    // Sort by date (most recent first)
-    const sorted = [...movementList].reverse();
-
-    sorted.forEach(movement => {
-        const typeBadge = movement.type === 'venta'
+    movementList.forEach(movement => {
+        const typeBadge = movement.tipo === 'venta'
             ? '<span class="badge-sale">Venta</span>'
             : '<span class="badge-purchase">Compra</span>';
 
-        const quantityText = movement.type === 'venta'
-            ? `-${movement.quantity}`
-            : `+${movement.quantity}`;
+        const quantityText = movement.tipo === 'venta'
+            ? `-${movement.cantidad}`
+            : `+${movement.cantidad}`;
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${movement.date}</td>
+            <td>${movement.fecha}</td>
             <td>${typeBadge}</td>
-            <td>${movement.productName}</td>
+            <td>${movement.producto_nombre}</td>
             <td>${quantityText}</td>
-            <td>${movement.user}</td>
+            <td>${movement.usuario_nombre}</td>
             <td>Completado</td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-/**
- * Filter movements by search term and type
- */
 function filterMovements() {
     const searchTerm = document.getElementById('searchMovement').value.toLowerCase().trim();
     const typeFilter = document.getElementById('filterType').value;
 
-    const filtered = movements.filter(movement => {
-        const matchesSearch = movement.productName.toLowerCase().includes(searchTerm);
-        const matchesType = typeFilter === 'all' || movement.type === typeFilter;
+    const filtered = movements.filter(m => {
+        const matchesSearch = m.producto_nombre.toLowerCase().includes(searchTerm);
+        const matchesType = typeFilter === 'all' || m.tipo === typeFilter;
         return matchesSearch && matchesType;
     });
 
     renderMovements(filtered);
 }
 
-/**
- * Get the current date formatted
- * @returns {string} Formatted date string
- */
-function getCurrentDate() {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
-}
-
-/**
- * ========== SELL OPERATIONS ==========
- */
-
-/**
- * Open the sell modal
- */
-function openSellModal() {
-    loadData();
+async function openSellModal() {
+    await loadData();
     document.getElementById('sellForm').reset();
     document.getElementById('sellProductInfo').style.display = 'none';
     document.getElementById('sellTotal').textContent = '$0';
@@ -140,34 +83,22 @@ function openSellModal() {
     document.getElementById('sellModal').style.display = 'flex';
 }
 
-/**
- * Close the sell modal
- */
 function closeSellModal() {
     document.getElementById('sellModal').style.display = 'none';
 }
 
-/**
- * Populate a select element with the products
- * @param {string} selectId - The id of the select element
- */
 function populateProductSelect(selectId) {
     const select = document.getElementById(selectId);
-
-    // Clear existing options (keep the first placeholder)
     select.innerHTML = '<option value="">Seleccione un producto</option>';
 
     products.forEach(product => {
         const option = document.createElement('option');
         option.value = product.id;
-        option.textContent = `${product.name} - $${product.price.toLocaleString()} (Stock: ${product.stock})`;
+        option.textContent = `${product.nombre} - $${product.precio.toLocaleString()} (Stock: ${product.stock})`;
         select.appendChild(option);
     });
 }
 
-/**
- * Update sell modal info when a product is selected
- */
 function updateSellInfo() {
     const productId = parseInt(document.getElementById('sellProduct').value);
     const infoBox = document.getElementById('sellProductInfo');
@@ -180,15 +111,12 @@ function updateSellInfo() {
     const product = products.find(p => p.id === productId);
 
     if (product) {
-        document.getElementById('sellPrice').textContent = '$' + product.price.toLocaleString();
+        document.getElementById('sellPrice').textContent = '$' + product.precio.toLocaleString();
         document.getElementById('sellStock').textContent = product.stock;
         infoBox.style.display = 'block';
     }
 }
 
-/**
- * Update the total price in the sell modal
- */
 function updateSellTotal() {
     const productId = parseInt(document.getElementById('sellProduct').value);
     const quantity = parseInt(document.getElementById('sellQuantity').value) || 0;
@@ -199,84 +127,55 @@ function updateSellTotal() {
     }
 
     const product = products.find(p => p.id === productId);
-
     if (product) {
-        const total = product.price * quantity;
-        document.getElementById('sellTotal').textContent = '$' + total.toLocaleString();
+        document.getElementById('sellTotal').textContent = '$' + (product.precio * quantity).toLocaleString();
     }
 }
 
-/**
- * Register a sell operation
- * @param {Event} event - The form submit event
- */
-function registerSell(event) {
+async function registerSell(event) {
     event.preventDefault();
 
     const productId = parseInt(document.getElementById('sellProduct').value);
     const quantity = parseInt(document.getElementById('sellQuantity').value);
     const errorElement = document.getElementById('sellError');
+    const currentUser = getCurrentUser();
 
     errorElement.textContent = '';
 
-    // Validations
-    if (!productId) {
-        errorElement.textContent = 'Debe seleccionar un producto';
+    if (!productId || !quantity || quantity <= 0) {
+        errorElement.textContent = 'Complete todos los campos correctamente';
         return;
     }
 
-    if (!quantity || quantity <= 0) {
-        errorElement.textContent = 'La cantidad debe ser mayor a cero';
-        return;
+    try {
+        const response = await fetch('api/movimientos.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tipo: 'venta',
+                producto_id: productId,
+                cantidad: quantity,
+                usuario_id: currentUser.id
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            closeSellModal();
+            await loadData();
+            renderMovements(movements);
+        } else {
+            errorElement.textContent = data.message;
+        }
+    } catch (error) {
+        errorElement.textContent = 'Error de conexion';
+        console.error(error);
     }
-
-    const product = products.find(p => p.id === productId);
-
-    if (!product) {
-        errorElement.textContent = 'Producto no encontrado';
-        return;
-    }
-
-    // Check stock availability
-    if (quantity > product.stock) {
-        errorElement.textContent = `No hay suficiente stock. Disponible: ${product.stock}`;
-        return;
-    }
-
-    // Update product stock
-    product.stock -= quantity;
-    saveProducts();
-
-    // Register movement
-    const user = getCurrentUser();
-    movements.push({
-        id: movements.length + 1,
-        type: 'venta',
-        productId: product.id,
-        productName: product.name,
-        quantity: quantity,
-        price: product.price,
-        total: product.price * quantity,
-        user: user ? user.name : 'Desconocido',
-        date: getCurrentDate()
-    });
-    saveMovements();
-
-    // Close modal and refresh table
-    closeSellModal();
-    loadData();
-    renderMovements(movements);
 }
 
-/**
- * ========== PURCHASE OPERATIONS ==========
- */
-
-/**
- * Open the purchase modal
- */
-function openPurchaseModal() {
-    loadData();
+async function openPurchaseModal() {
+    await loadData();
     document.getElementById('purchaseForm').reset();
     document.getElementById('purchaseProductInfo').style.display = 'none';
     document.getElementById('purchaseError').textContent = '';
@@ -284,16 +183,10 @@ function openPurchaseModal() {
     document.getElementById('purchaseModal').style.display = 'flex';
 }
 
-/**
- * Close the purchase modal
- */
 function closePurchaseModal() {
     document.getElementById('purchaseModal').style.display = 'none';
 }
 
-/**
- * Update purchase modal info when a product is selected
- */
 function updatePurchaseInfo() {
     const productId = parseInt(document.getElementById('purchaseProduct').value);
     const infoBox = document.getElementById('purchaseProductInfo');
@@ -304,65 +197,50 @@ function updatePurchaseInfo() {
     }
 
     const product = products.find(p => p.id === productId);
-
     if (product) {
         document.getElementById('purchaseStock').textContent = product.stock;
         infoBox.style.display = 'block';
     }
 }
 
-/**
- * Register a purchase operation
- * @param {Event} event - The form submit event
- */
-function registerPurchase(event) {
+async function registerPurchase(event) {
     event.preventDefault();
 
     const productId = parseInt(document.getElementById('purchaseProduct').value);
     const quantity = parseInt(document.getElementById('purchaseQuantity').value);
     const errorElement = document.getElementById('purchaseError');
+    const currentUser = getCurrentUser();
 
     errorElement.textContent = '';
 
-    // Validations
-    if (!productId) {
-        errorElement.textContent = 'Debe seleccionar un producto';
+    if (!productId || !quantity || quantity <= 0) {
+        errorElement.textContent = 'Complete todos los campos correctamente';
         return;
     }
 
-    if (!quantity || quantity <= 0) {
-        errorElement.textContent = 'La cantidad debe ser mayor a cero';
-        return;
+    try {
+        const response = await fetch('api/movimientos.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tipo: 'compra',
+                producto_id: productId,
+                cantidad: quantity,
+                usuario_id: currentUser.id
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            closePurchaseModal();
+            await loadData();
+            renderMovements(movements);
+        } else {
+            errorElement.textContent = data.message;
+        }
+    } catch (error) {
+        errorElement.textContent = 'Error de conexion';
+        console.error(error);
     }
-
-    const product = products.find(p => p.id === productId);
-
-    if (!product) {
-        errorElement.textContent = 'Producto no encontrado';
-        return;
-    }
-
-    // Update product stock
-    product.stock += quantity;
-    saveProducts();
-
-    // Register movement
-    const user = getCurrentUser();
-    movements.push({
-        id: movements.length + 1,
-        type: 'compra',
-        productId: product.id,
-        productName: product.name,
-        quantity: quantity,
-        price: product.price,
-        total: product.price * quantity,
-        user: user ? user.name : 'Desconocido',
-        date: getCurrentDate()
-    });
-    saveMovements();
-
-    // Close modal and refresh table
-    closePurchaseModal();
-    loadData();
-    renderMovements(movements);
 }
