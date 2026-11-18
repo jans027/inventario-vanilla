@@ -14,7 +14,7 @@ async function loadData() {
         if (movData.success) movements = movData.movements;
         if (prodData.success) products = prodData.products;
     } catch (error) {
-        console.error('Error:', error);
+        showToast('Error de conexion', 'error');
     }
 }
 

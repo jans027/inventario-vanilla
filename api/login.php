@@ -35,8 +35,8 @@ if ($result->num_rows === 0) {
 
 $user = $result->fetch_assoc();
 
-// Verify password (plain text for now, use password_verify later)
-if ($user['contrasena'] !== $contrasena) {
+// Verificación de hash
+if (!password_verify($contrasena, $user['contrasena'])) {
     sendResponse(false, null, 'Correo o contrasena incorrectos');
 }
 

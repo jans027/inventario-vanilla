@@ -84,9 +84,10 @@ function createUser($conn) {
         sendResponse(false, null, 'Ya existe un usuario con ese correo');
     }
 
-    // Insert user
-    $stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contrasena, rol, estado) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $nombre, $correo, $contrasena, $rol, $estado);
+    // Después (Encriptado):
+$contrasena_encriptada = password_hash($contrasena, PASSWORD_DEFAULT);
+$stmt = $conn->prepare("INSERT INTO usuarios (nombre, correo, contrasena, rol, estado) VALUES (?, ?, ?, ?, ?)");
+$stmt->bind_param("sssss", $nombre, $correo, $contrasena_encriptada, $rol, $estado);
 
     if ($stmt->execute()) {
         sendResponse(true, ['id' => $conn->insert_id], 'Usuario creado correctamente');

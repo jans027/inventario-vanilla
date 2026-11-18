@@ -15,11 +15,14 @@ async function loadProducts() {
         if (data.success) {
             products = data.products;
             renderProducts(products);
+            showToast('Producto guardado correctamente', 'success');
         } else {
             console.error('Error:', data.message);
+            showToast(data.message, 'error');
         }
     } catch (error) {
         console.error('Error de conexion:', error);
+        showToast('Error de conexion', 'error');
     }
 }
 
@@ -124,11 +127,12 @@ async function saveProduct(event) {
         if (data.success) {
             closeProductModal();
             loadProducts();
+            showToast('Producto guardado correctamente', 'success');
         } else {
-            alert('Error: ' + data.message);
+            showToast(data.message, 'error');
         }
     } catch (error) {
-        alert('Error de conexion');
+        showToast('Error de conexion', 'error');
         console.error(error);
     }
 }
@@ -159,8 +163,9 @@ async function confirmDelete() {
             productIdToDelete = null;
             closeDeleteModal();
             loadProducts();
+            showToast('Producto guardado correctamente', 'success');
         } else {
-            alert('Error: ' + data.message);
+            showToast(data.message, 'error');
         }
     } catch (error) {
         alert('Error de conexion');

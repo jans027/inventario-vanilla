@@ -219,11 +219,12 @@ async function confirmDeleteUser() {
             userIdToDelete = null;
             closeDeleteUserModal();
             loadUsers();
+            showToast('Producto guardado correctamente', 'success');
         } else {
-            alert('Error: ' + data.message);
+            showToast(data.message, 'error');
         }
     } catch (error) {
-        alert('Error de conexion');
+        showToast('Error de conexion', 'error');
         console.error(error);
     }
 }
