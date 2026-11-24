@@ -3,48 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ferreteria Caldas</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Sistema de Control de Inventario para Ferretería Caldas. Gestión eficiente de productos, ventas y stock.">
+    <meta name="keywords" content="inventario, ferreteria, gestion de stock, sistema web, control de productos">
+    <meta name="author" content="Tu Nombre">
+    <meta name="robots" content="noindex, nofollow"> <!-- Para que no se indexe en buscadores por ser un sistema privado -->
+    
+    <title>Login | Sistema de Inventario - Ferretería Caldas</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body class="login-body">
 
-    <!-- Login container -->
-    <div class="login-container">
-        <div class="login-card">
-            <h1 class="login-title">Ferreteria Caldas</h1>
-            <p class="login-subtitle">Sistema de Control de Inventario</p>
+    <!-- Semantic HTML: Header -->
+    <header>
+        <h1 class="login-title">Ferretería Caldas</h1>
+        <p class="login-subtitle">Sistema de Control de Inventario</p>
+    </header>
 
-            <!-- Login form -->
-            <form id="loginForm" class="login-form">
+    <!-- Semantic HTML: Main Content -->
+    <main class="login-container">
+        <section class="login-card">
+            <!-- Form -->
+            <form id="loginForm" class="login-form" aria-label="Formulario de inicio de sesión">
                 <div class="form-group">
                     <label for="email">Correo electronico</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        placeholder="correo@ejemplo.com"
-                        required
-                    >
+                    <!-- Accessibility: aria-required -->
+                    <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required aria-required="true">
                 </div>
 
                 <div class="form-group">
                     <label for="password">Contrasena</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        placeholder="Ingrese su contrasena"
-                        required
-                    >
+                    <input type="password" id="password" name="password" placeholder="Ingrese su contrasena" required aria-required="true">
                 </div>
 
-                <button type="submit" class="btn-login">Ingresar</button>
+                <button type="submit" class="btn-login" aria-label="Ingresar al sistema">Ingresar</button>
             </form>
 
-            <!-- Error message (hidden by default) -->
-            <p id="loginError" class="login-error"></p>
-        </div>
-    </div>
+            <p id="loginError" class="login-error" aria-live="polite"></p>
+        </section>
+    </main>
 
     <script src="js/auth.js"></script>
 </body>
